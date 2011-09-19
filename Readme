@@ -1,0 +1,49 @@
+optiLoader.pde
+
+Copyright (c) 2011 by Bill Westfield ("WestfW")
+Distributed under the terms of the "MIT OSSW License."
+
+Optiloader is a sketch designed for bulk upgrading of Arduino board
+bootloaders using another Arduino as a device programmer.  It stores
+multiple copies of the optiboot bootloader in program flash memory.  When
+run (ie by hitting reset), it probes the target device, figures out the type
+of CPU (ATmega8, ATmega168, ATmega328, ATmega328P) and initiates upload of
+the bootloader and appropriate fuse programming.  Since optiLoader runs
+entirely with the Arduino and there is no communications with a host PC
+required, this can procede very rapidly, and is not subject to interference
+of (for example) avrdude with auto-reset.
+
+The internal copies of the bootloader are prepare manually from the .hex
+files compiled in the bootloader directories.  (There's an easy editor macro
+process, but it is manual.)
+
+While communication with a host PC is not required, the sketch does send
+status information to the serial port at 19200bps.  Here's a sample:
+
+OptiLoader Bootstrap programmer.
+2011 by Bill Westfield (WestfW)
+
+Target power on! ...
+Starting Program Mode [OK]
+
+Reading signature:950F
+Searching for image...
+  Found "optiboot_atmega328.hex" for atmega328P
+  Start address at 7E00
+  Total bytes read: 502
+
+Setting fuses for programming
+  Lock: 3F FFE000  Low: FF FFA000  High: DE FFA800  Ext: 5 FFA400
+
+Programming bootloader: 512 bytes at 0x3F00
+  Commit Page: 3F00:3F00
+  Commit Page: 3F40:3F40
+  Commit Page: 3F80:3F80
+  Commit Page: 3FC0:3FC0
+
+Restoring normal fuses
+  Lock: 2F FFE000
+
+Target power OFF!
+
+Type 'G' or hit RESET for next chip
