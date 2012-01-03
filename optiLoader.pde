@@ -33,6 +33,7 @@
 //
 // It is based on AVRISP
 //
+// Designed to connect to a generic programming cable,
 // using the following pins:
 // 10: slave reset
 // 11: MOSI
@@ -48,6 +49,16 @@
 //     connect the target power to a stronger source of +5V.  Do not use pin
 //     9 to power more complex Arduino boards that draw more than 40mA, such
 //     as the Arduino Uno Ethernet !
+//
+// If the aim is to reprogram the bootloader in one Arduino using another
+// Arudino as the programmer, you can just use jumpers between the connectors
+// on the Arduino board.  In this case, connect:
+// Pin 13 to Pin 13
+// Pin 12 to Pin 12
+// Pin 11 to Pin 11
+// Pin 10 (of "programmer") to RESET (of "target" (on the "power" connector))
+// +5V to +5V and GND to GND.  Only the "programmer" board should be powered
+//     by USB or external power.
 //
 // ----------------------------------------------------------------------
 
@@ -69,8 +80,11 @@
 // - The SPI functions herein were developed for the AVR910_ARD programmer 
 // - More information at http://code.google.com/p/mega-isp
 
+
 #include <avr/pgmspace.h>
 #include "optiLoader.h"
+
+char Arduino_preprocessor_hint;
 
 /*
  * Pins to target
@@ -93,7 +107,7 @@
 
 // Forward references
 void pulse(int pin, int times);
-void read_image (image_t *ip);
+void read_image(image_t *ip);
 
 // Global Variables
 
@@ -108,13 +122,13 @@ int pmode=0;
 // address for reading and writing, set by 'U' command
 int here;
 
-uint16_t target_type = 0; 	       /* type of target_cpu */
+uint16_t target_type = 0;		/* type of target_cpu */
 uint16_t target_startaddr;
-byte target_pagesize; 		       /* Page size for flash programming (bytes) */
+uint8_t target_pagesize;       /* Page size for flash programming (bytes) */
 uint8_t *buff;
 
 image_t *target_flashptr; 	       /* pointer to target info in flash */
-byte target_code[512]; 		       /* The whole code */
+uint8_t target_code[512];	       /* The whole code */
 
 
 void setup () {
@@ -125,13 +139,13 @@ void setup () {
 
 void loop (void) {
   fp("\nOptiLoader Bootstrap programmer.\n2011 by Bill Westfield (WestfW)\n\n");
-  if (target_poweron()) { 			/* Turn on target power */
+  if (target_poweron()) {		/* Turn on target power */
     do {
       if (!target_identify()) 		/* Figure out what kind of CPU */
         break;
-      if (!target_findimage()) 	/* look for an image */
+      if (!target_findimage())		/* look for an image */
         break;
-      if (!target_progfuses()) 	/* get fuses ready to program */
+      if (!target_progfuses())		/* get fuses ready to program */
         break;
       if (!target_program()) 		/* Program the image */
         break;
@@ -161,7 +175,7 @@ void loop (void) {
  */
 void flashprint (const char p[])
 {
-  byte c;
+  uint8_t c;
   while (0 != (c = pgm_read_byte(p++))) {
     Serial.write(c);
   }
@@ -171,7 +185,7 @@ void flashprint (const char p[])
  * hexton
  * Turn a Hex digit (0..9, A..F) into the equivalent binary value (0-16)
  */
-byte hexton (byte h)
+uint8_t hexton (uint8_t h)
 {
   if (h >= '0' && h <= '9')
     return(h - '0');
@@ -320,7 +334,7 @@ void read_image (image_t *ip)
   char *hextext = &ip->image_hexcode[0];
   target_startaddr = 0;
   target_pagesize = pgm_read_byte(&ip->image_pagesize);
-  byte b, cksum = 0;
+  uint8_t b, cksum = 0;
 
   while (1) {
     if (pgm_read_byte(hextext++) != ':') {
@@ -352,7 +366,7 @@ void read_image (image_t *ip)
     b = (b<<4) + hexton(pgm_read_byte(hextext++));
     cksum += b;
 
-    for (byte i=0; i < len; i++) {
+    for (uint8_t i=0; i < len; i++) {
       b = hexton(pgm_read_byte(hextext++));
       b = (b<<4) + hexton(pgm_read_byte(hextext++));
       if (addr - target_startaddr >= sizeof(target_code)) {
@@ -402,7 +416,7 @@ boolean target_findimage ()
 {
   image_t *ip;
   fp("Searching for image...\n");
-  for (byte i=0; i < sizeof(images)/sizeof(images[0]); i++) {
+  for (uint8_t i=0; i < sizeof(images)/sizeof(images[0]); i++) {
     target_flashptr = ip = images[i];
     if (ip && (pgm_read_word(&ip->image_chipsig) == target_type)) {
       fp("  Found \"");
@@ -426,7 +440,7 @@ boolean target_findimage ()
 
 boolean target_progfuses ()
 {
-  byte f;
+  uint8_t f;
   fp("\nSetting fuses for programming");
 
   f = pgm_read_byte(&target_flashptr->image_progfuses[FUSE_PROT]);
@@ -494,7 +508,7 @@ boolean target_program ()
  */
 boolean target_normfuses ()
 {
-  byte f;
+  uint8_t f;
   fp("\nRestoring normal fuses");
 
   f = pgm_read_byte(&target_flashptr->image_normfuses[FUSE_PROT]);
