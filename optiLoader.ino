@@ -107,14 +107,14 @@ char Arduino_preprocessor_hint;
 
 // Forward references
 void pulse(int pin, int times);
-void read_image(image_t *ip);
+void read_image(const image_t *ip);
 
 // Global Variables
 
 /*
  * Table of defined images
  */
-image_t *images[] = {
+const image_t * images[] = {
   &image_328, &image_328p, &image_168, &image_8, 0
 };
 
@@ -127,11 +127,10 @@ uint16_t target_startaddr;
 uint8_t target_pagesize;       /* Page size for flash programming (bytes) */
 uint8_t *buff;
 
-image_t *target_flashptr; 	       /* pointer to target info in flash */
+const image_t *target_flashptr; 	       /* pointer to target info in flash */
 uint8_t target_code[512];	       /* The whole code */
-
 
-void setup () {
+void setup (void) {
   Serial.begin(19200); 			/* Initialize serial for status msgs */
   pinMode(13, OUTPUT); 			/* Blink the pin13 LED a few times */
   pulse(13,20);
@@ -192,6 +191,7 @@ uint8_t hexton (uint8_t h)
   if (h >= 'A' && h <= 'F')
     return((h - 'A') + 10);
   error("Bad hex digit!");
+  return(0);
 }
 
 /*
@@ -213,7 +213,7 @@ void pulse (int pin, int times) {
  * spi_init
  * initialize the AVR SPI peripheral
  */
-void spi_init () {
+void spi_init (void) {
   uint8_t x;
   SPCR = 0x53;  // SPIE | MSTR | SPR1 | SPR0
   x=SPSR;
@@ -224,7 +224,7 @@ void spi_init () {
  * spi_wait
  * wait for SPI transfer to complete
  */
-void spi_wait () {
+void spi_wait (void) {
   debug("spi_wait");
   do {
   } 
@@ -280,7 +280,7 @@ unsigned long spi_transaction (uint8_t a, uint8_t b, uint8_t c, uint8_t d) {
   n=spi_send(b);
   //if (n != a) error = -1;
   m=spi_send(c);
-  return 0xFFFFFF & ((n<<16)+(m<<8) + spi_send(d));
+  return 0xFFFFFF & ((((uint32_t)n)<<16)+(m<<8) + spi_send(d));
 }
 
 uint16_t start_pmode () {
@@ -306,7 +306,7 @@ uint16_t start_pmode () {
   return result;
 }
 
-void end_pmode () {
+void end_pmode (void) {
   SPCR = 0; 				/* reset SPI */
   digitalWrite(MISO, 0); 		/* Make sure pullups are off too */
   pinMode(MISO, INPUT);
@@ -328,10 +328,10 @@ void end_pmode () {
  * Also read other data from the image, such as fuse and protecttion byte
  * values during programming, and for after we're done.
  */
-void read_image (image_t *ip)
+void read_image (const image_t *ip)
 {
   uint16_t len, totlen=0, addr;
-  char *hextext = &ip->image_hexcode[0];
+  const char *hextext = &ip->image_hexcode[0];
   target_startaddr = 0;
   target_pagesize = pgm_read_byte(&ip->image_pagesize);
   uint8_t b, cksum = 0;
@@ -414,7 +414,7 @@ void read_image (image_t *ip)
 
 boolean target_findimage ()
 {
-  image_t *ip;
+  const image_t *ip;
   fp("Searching for image...\n");
   for (uint8_t i=0; i < sizeof(images)/sizeof(images[0]); i++) {
     target_flashptr = ip = images[i];
@@ -657,10 +657,21 @@ uint16_t read_signature () {
  * These are the intel Hex files produced by the optiboot makefile,
  * with a small amount of automatic editing to turn them into C strings,
  * and a header attched to identify them
+ *
+ * Emacs keyboard macro:
+
+      4*SPC			;; self-insert-command
+      "			;; self-insert-command
+      C-e			;; move-end-of-line
+      \			;; self-insert-command
+      n"			;; self-insert-command * 2
+      C-n			;; next-line
+      C-a			;; move-beginning-of-line
+
  */
 
 
-image_t PROGMEM image_328 = {
+const image_t PROGMEM image_328 = {
   {
     "optiboot_atmega328.hex"    }
   ,
@@ -714,7 +725,7 @@ image_t PROGMEM image_328 = {
   }
 };
 
-image_t PROGMEM image_328p = {
+const image_t PROGMEM image_328p = {
   {
     "optiboot_atmega328.hex"    }
   ,
@@ -768,7 +779,7 @@ image_t PROGMEM image_328p = {
   }
 };
 
-image_t PROGMEM image_168 = {
+const image_t PROGMEM image_168 = {
   {
     "optiboot_atmega168.hex"    }
   ,
@@ -822,7 +833,7 @@ image_t PROGMEM image_168 = {
   }
 };
 
-image_t PROGMEM image_8 = {
+const image_t PROGMEM image_8 = {
   {
     "optiboot_atmega8.hex"    }
   ,
