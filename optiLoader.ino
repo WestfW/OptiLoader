@@ -4,7 +4,7 @@
 // Arduino-like device containing ATmega8, ATmega168, or ATmega328
 // microcontroller chips.
 //
-// Copyright (c) 2011 by Bill Westfield ("WestfW")
+// Copyright (c) 2011, 2015 by Bill Westfield ("WestfW")
 
 //-------------------------------------------------------------------------------------
 // "MIT Open Source Software License":
@@ -116,6 +116,18 @@ void read_image(const image_t *ip);
  */
 const image_t * images[] = {
   &image_328, &image_328p, &image_168, &image_8, 0
+};
+
+/*
+ * Table of "Aliases."  Chips that are effectively the same as chips
+ * that we have a bootloader for.  These work by simply overriding the
+ * signature read with the signature of the chip we "know."
+ */
+const alias_t aliases[] = {
+  { "ATmega168PA", 0x940B, 0x9406 },	/* Treat 168P same as 168 */
+  { "ATmega168PB", 0x9415, 0x9406 },	/* Treat 168PB same as 168 */
+  { "ATmega328PB", 0x9516, 0x950F },	/* Treat 328PB same as 328P */
+  { "ATmega328",   0x9514, 0x950F },	/* Treat 328 same as 328P */
 };
 
 int pmode=0;
@@ -416,6 +428,21 @@ boolean target_findimage ()
 {
   const image_t *ip;
   fp("Searching for image...\n");
+  /*
+   * Search through our table of chip aliases first
+   */
+  for (uint8_t i=0; i < sizeof(aliases)/sizeof(aliases[0]); i++) {
+    const alias_t *a = &aliases[i];
+    if (a->real_chipsig == target_type) {
+      fp("  Compatible bootloader for ");
+      Serial.println(a->alias_chipname);
+      target_type = a->alias_chipsig;  /* Overwrite chip signature */
+      break;
+    }
+  }
+  /*
+   * Search through our table of self-contained images.
+   */
   for (uint8_t i=0; i < sizeof(images)/sizeof(images[0]); i++) {
     target_flashptr = ip = images[i];
     if (ip && (pgm_read_word(&ip->image_chipsig) == target_type)) {

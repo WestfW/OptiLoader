@@ -7,11 +7,11 @@ Optiloader is a sketch designed for bulk upgrading of Arduino board
 bootloaders using another Arduino as a device programmer.  It stores
 multiple copies of the optiboot bootloader in program flash memory.  When
 run (ie by hitting reset), it probes the target device, figures out the type
-of CPU (ATmega8, ATmega168, ATmega328, ATmega328P) and initiates upload of
-the bootloader and appropriate fuse programming.  Since optiLoader runs
-entirely with the Arduino and there is no communications with a host PC
-required, this can procede very rapidly, and is not subject to interference
-of (for example) avrdude with auto-reset.
+of CPU (ATmega8, ATmega168, ATmega168P, ATmega168PB, ATmega328, ATmega328P,
+ATmega328PB) and initiates upload of the bootloader and appropriate fuse
+programming.  Since optiLoader runs entirely with the Arduino and there is
+no communications with a host PC required, this can procede very rapidly,
+and is not subject to interference of (for example) avrdude with auto-reset.
 
 The internal copies of the bootloader are prepared manually from the .hex
 files compiled in the bootloader directories.  (There's an easy editor macro
