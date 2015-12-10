@@ -11,9 +11,9 @@ typedef struct image {
 } image_t;
 
 typedef struct alias {
-  char image_chipname[12];
-  uint16_t image_chipsig;
-  image_t * alias_image;
+  char alias_chipname[12];		/* Name of chip.  ie Atmega168PA */
+  uint16_t real_chipsig;		/* Low 16 bits actual chip sig. */
+  uint16_t alias_chipsig;		/* "is the same as <otherchip sig>" */
 } alias_t;
 
 #define FUSE_PROT 0			/* memory protection */
