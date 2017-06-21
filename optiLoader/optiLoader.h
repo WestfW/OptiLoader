@@ -1,6 +1,3 @@
-#ifndef OPTILOADER_H
-#define OPTILOADER_H
-
 #include <stdint.h>
 
 typedef struct image {
@@ -26,5 +23,3 @@ typedef struct alias {
 
 // Forward decl
 extern const image_t PROGMEM image_328, image_328p, image_168, image_8;
-
-#endif
