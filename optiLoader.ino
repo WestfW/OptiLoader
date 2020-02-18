@@ -41,7 +41,7 @@
 // 13: SCK
 //  9: Power to external chip.
 //     This is a little questionable, since the power it is legal to draw
-//     from a PIC pin is pretty close to the power consumption of an AVR
+//     from a AVR pin is pretty close to the power consumption of an AVR
 //     chip being programmed.  But it permits the target to be entirely
 //     powered down for safe reconnection of the programmer to additional
 //     targets, and it seems to work for most Arduinos.  If the target board

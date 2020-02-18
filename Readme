@@ -47,3 +47,9 @@ Restoring normal fuses
 Target power OFF!
 
 Type 'G' or hit RESET for next chip
+
+~~~
+Apparently, this was a pretty neat idea, because several other people have taken it and (substantially!) enhanced, or re-written it.  (and done much more complete documentation as well.)
+
+https://learn.adafruit.com/standalone-avr-chip-programmer?view=all
+http://www.gammon.com.au/bootloader
