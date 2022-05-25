@@ -366,11 +366,11 @@ void read_image (const image_t *ip)
     len = (len << 4) + hexton(pgm_read_byte(hextext++));
     cksum = len;
 
-    b = hexton(pgm_read_byte(hextext++)); /* record type */
+    b = hexton(pgm_read_byte(hextext++)); /* address byte */
     b = (b << 4) + hexton(pgm_read_byte(hextext++));
     cksum += b;
     addr = b;
-    b = hexton(pgm_read_byte(hextext++)); /* record type */
+    b = hexton(pgm_read_byte(hextext++)); /* address byte */
     b = (b << 4) + hexton(pgm_read_byte(hextext++));
     cksum += b;
     addr = (addr << 8) + b;
